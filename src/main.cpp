@@ -60,13 +60,21 @@ void loop()
 
 void do_step()
 {
+  
   time_t now = time(nullptr);
+  Serial.println(ctime(&now));
+
   struct tm * ptm = gmtime(&now);
-  uint8_t deg = (ptm->tm_min - current_minute) * 6;  // minute to degrees
+
+  uint8_t minutes = (ptm->tm_min - current_minute);
   current_minute = ptm->tm_min;
 
-  Serial.println(ctime(&now));
-  
+  if (minutes > 2) // To catch roll-over
+  {
+    minutes = ptm->tm_min + 1;
+  }
+
+  uint8_t deg = 6 * minutes;
 
   stepper.newMoveDegreesCCW(deg * rotations_per_hour);
 }
