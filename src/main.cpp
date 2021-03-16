@@ -2,79 +2,82 @@
 
 void setup() 
 {
+  Serial.println(USER_TZ);
   Serial.begin(115200);
 
   AsyncWiFiManager wifiManager(&server,&dns);
   wifiManager.autoConnect("HollowClock_setup");
 
-  configTime(USER_TZ, "pool.ntp.org");
-
-  Serial.print("Waiting for NTP time sync: ");
-  time_t now = time(nullptr);
-  while (now < 8 * 3600 * 2) {
+  NTP.setTimeZone (USER_TZ);
+  NTP.begin();
+  Serial.print("Getting NTP sync");
+  while(!NTP.getFirstSync())
+  {
     delay(500);
     Serial.print(".");
-    now = time(nullptr);
   }
-  Serial.println("");
-  Serial.print(ctime(&now));
+  Serial.print("\nGot sync. Time is: ");
+  Serial.println(NTP.getTimeDateString(time(nullptr), "%FT%T%z\n"));
+
+  move(true);
 
   stepper.setTotalSteps(steps_per_rotation);
   stepper.setRpm(6); // Lowest allowed is 6
-  Serial.println(stepper.getDelay());
-
 }
 
-bool step_triggered, sync_triggered;
 void loop() 
 {
-  if(millis() % step_interval == 0)
-  {
-    if(!step_triggered)
-    {
-      step_triggered = true;
-      do_step();
-    }
-  }
-  else
-  {
-    step_triggered = false;
-  }
-
-  if((millis()) % sync_interval == 0 && !sync_triggered)
-  {
-    if(!sync_triggered)
-    {
-      sync_triggered = true;
-      // Sync time with NTP server
-      configTime(USER_TZ, "pool.ntp.org");
-    }
-  }
-  else
-  {
-    sync_triggered = false;
-  }
+  move();
   stepper.run();
 }
 
-
-void do_step()
+void move(bool init)
 {
-  
-  time_t now = time(nullptr);
-  Serial.println(ctime(&now));
-
-  struct tm * ptm = gmtime(&now);
-
-  uint8_t minutes = (ptm->tm_min - current_minute);
-  current_minute = ptm->tm_min;
-
-  if (minutes > 2) // To catch roll-over
+  if (millis() % update_interval && !init)
   {
-    minutes = ptm->tm_min + 1;
+    return;
+  }
+  time_t now = time(nullptr);
+  struct tm * ptm = localtime(&now);
+
+  int new_position_deg = (ptm->tm_min * 60 + ptm->tm_sec) / 10;
+  int deg = deg_rollover(new_position_deg - last_position_deg);
+
+  if (millis()-last_print > print_interval && print_interval != 0)
+  {
+    last_print = millis();
+    Serial.print(NTP.getTimeDateString(now, "%FT%T%z"));
+    Serial.printf("|  target: %d°\tcurrent: %d°\t%s\n", new_position_deg, last_position_deg, strbuff);
+    strbuff[0] = '\0';
   }
 
-  uint8_t deg = 6 * minutes;
+  if((now - last_movement) > move_interval && !init)
+  {
+    last_movement = now;
+    last_position_deg = new_position_deg;
+    snprintf(strbuff, sizeof(strbuff), "Moving %d°", deg);
+    stepper.newMoveDegreesCCW(deg * rotations_per_hour);
+  }
+  if (init)
+  {
+    last_movement = now;
+    last_position_deg = new_position_deg;
+    snprintf(strbuff, sizeof(strbuff), "Initialization. Would've moved %d°", deg);
+  }
+}
 
-  stepper.newMoveDegreesCCW(deg * rotations_per_hour);
+// Mostly taken from CheapStepper source.
+int deg_rollover(int deg)
+{
+  // keep to 0-359 range
+  if (deg >= 360 || deg < 0) 
+  {
+    deg %= 360; // returns negative if deg not multiple of 360
+  }
+  if (deg < 0)
+  {
+    deg += 360; // shift into 0-359 range
+  }
+
+  return deg;
 }
