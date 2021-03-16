@@ -10,8 +10,8 @@
 
     #define USER_TZ TZ_Europe_Copenhagen  // You can look for your timezone here https://github.com/gmag11/ESPNtpClient/blob/main/src/TZdef.h
 
-    char* hostname = "HollowClock"; // Remember to change this in the OTA environments if you use ota
-    char* OTA_pass = "ota_password";
+    const char* hostname = "HollowClock"; // Remember to change this in the OTA environments if you use ota
+    const char* OTA_pass = "ota_password";
 
 // These are here if you want to tinker
     const char* ntp_server = "pool.ntp.org";

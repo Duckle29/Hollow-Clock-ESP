@@ -15,17 +15,11 @@ void setup()
   }
   
   // WiFi setup
-  #if defined(ESP8266)
-    WiFi.hostname(hostname);
-  #else
-    WiFi.setHostname(hostname);
-  #endif
-  
   AsyncWiFiManager wifiManager(&server,&dns);
   wifiManager.autoConnect((String(hostname) + "_setup").c_str());
 
   // OTA setup
-  ota.setup(hostname, OTA_pass);
+  ota.setup((char*)hostname, (char*)OTA_pass);
   ota.onStart([] () {
     Serial.println("OTA START");
   });
