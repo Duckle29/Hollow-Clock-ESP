@@ -5,6 +5,15 @@ void setup()
   Serial.println(USER_TZ);
   Serial.begin(115200);
 
+  for (int i=0; i<sizeof(ui_pins)/sizeof(ui_pins[0]); i++)
+  {
+    if (ui_pins[i] >= 0)
+    {
+      pinMode(ui_pins[i], INPUT_PULLUP);
+    }
+  }
+  
+
   AsyncWiFiManager wifiManager(&server,&dns);
   wifiManager.autoConnect("HollowClock_setup");
 
@@ -27,8 +36,56 @@ void setup()
 
 void loop() 
 {
+  handle_ui();
   move();
   stepper.run();
+}
+
+// This will handle 4 buttons if their pin is set to anything but -1. Any combination can be used.
+// See more in config
+void handle_ui()
+{
+  uint8_t state = 0;
+  for (int i=0; i<sizeof(ui_pins)/sizeof(ui_pins[0]); i++)
+  {
+    if (ui_pins[i] >= 0)
+    {
+      state |= !digitalRead(ui_pins[i]) << i;
+    }
+  }
+
+  int rpm = stepper.getRpm();
+  switch (state)
+  {
+    case 0b1000: // Forward fast
+      stepper.setRpm(20);
+      stepper.stepCCW();
+      break;
+
+    case 0b0100:  // Forward slow
+      stepper.setRpm(6);
+      stepper.stepCCW();
+      break;
+
+    case 0b0010:  // Reverse slow
+      stepper.setRpm(6);
+      stepper.stepCW();
+      break;
+    
+    case 0b0001:  // Reverse fast
+      stepper.setRpm(20);
+      stepper.stepCW();
+      break;
+    
+    case 0b0000:
+      // Do nothing
+      break;
+    
+    default:
+      pstrbuff += snprintf(pstrbuff, sizeof(strbuff)-(pstrbuff-strBuffer)-1, "multiple buttons held");
+
+  }
+  stepper.setRpm(rpm);
 }
 
 void move(bool init)
@@ -55,14 +112,14 @@ void move(bool init)
   {
     last_movement = now;
     last_position_deg = new_position_deg;
-    snprintf(strbuff, sizeof(strbuff), "Moving %d°", deg);
+    pstrbuff += snprintf(pstrbuff, sizeof(strbuff)-(pstrbuff-strBuffer)-1, "Moving %d°", deg);
     stepper.newMoveDegreesCCW(deg * rotations_per_hour);
   }
   if (init)
   {
     last_movement = now;
     last_position_deg = new_position_deg;
-    snprintf(strbuff, sizeof(strbuff), "Initialization. Would've moved %d°", deg);
+    pstrbuff += snprintf(pstrbuff, sizeof(strbuff)-(pstrbuff-strBuffer)-1, "Initialization. Would've moved %d°", deg);
   }
 }
 

@@ -23,14 +23,16 @@
 AsyncWebServer server(80);
 DNSServer dns;
 
-CheapStepper stepper(pins[0], pins[1], pins[2], pins[3]);
+CheapStepper stepper(motor_pins[0], motor_pins[1], motor_pins[2], motor_pins[3]);
 
 time_t last_movement;
 uint16_t last_position_deg;
 uint32_t last_print;
-char strbuff[50];
+char strbuff[200];
+char * pstrbuff = strbuff;
 
 // Prototypes
 void move(bool init=false);
 void time_sync(void);
 int deg_rollover(int);
+void handle_ui(void);
