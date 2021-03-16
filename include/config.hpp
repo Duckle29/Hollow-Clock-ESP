@@ -4,7 +4,7 @@
 // Probably the only things you want to change:
     const uint8_t motor_pins[] = {D1, D2, D3, D4};  // The pins you've connected IN1...IN4 to
 
-    // Pins used to advance the discs manually for adjustments
+    // Pins used to rotate the motor for manual adjustments. Connect buttons between an pin and gnd (active low)
     // {rev fast, rev fine, fwd fine, fwd fast}
     const int ui_pins[] = {-1, -1, -1, -1};
 
