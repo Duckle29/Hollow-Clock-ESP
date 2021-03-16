@@ -5,6 +5,7 @@ void setup()
   Serial.println(USER_TZ);
   Serial.begin(115200);
 
+  // IO setup
   for (int i=0; i<sizeof(ui_pins)/sizeof(ui_pins[0]); i++)
   {
     if (ui_pins[i] >= 0)
@@ -13,10 +14,30 @@ void setup()
     }
   }
   
-
+  // WiFi setup
   AsyncWiFiManager wifiManager(&server,&dns);
-  wifiManager.autoConnect("HollowClock_setup");
+  wifiManager.autoConnect((String(hostname) + "_setup").c_str());
 
+  // OTA setup
+  ota.setup((char*)hostname, (char*)OTA_pass);
+  ota.onStart([] () {
+    Serial.println("OTA START");
+  });
+  ota.onEnd([] () {
+    Serial.println(".");
+    Serial.println("OTA END");
+  });
+  ota.onError([] () {
+    Serial.println("OTA ERROR");
+  });
+   ota.onProgress([] () {
+     int p = ota.getProgress();
+     if (p % 5 == 0) {
+       Serial.print(".");
+     }
+  });
+
+  // NTP setup
   NTP.setTimeZone (USER_TZ);
   NTP.begin();
   Serial.print("Getting NTP sync");
@@ -28,8 +49,8 @@ void setup()
   Serial.print("\nGot sync. Time is: ");
   Serial.println(NTP.getTimeDateString(time(nullptr), "%FT%T%z\n"));
 
+  // Stepper setup
   move(true);
-
   stepper.setTotalSteps(steps_per_rotation);
   stepper.setRpm(6); // Lowest allowed is 6
 }
@@ -38,6 +59,7 @@ void loop()
 {
   handle_ui();
   move();
+  ota.loop();
   stepper.run();
 }
 
