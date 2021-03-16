@@ -16,15 +16,12 @@
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>
 
-#include <OTAWrapper.h>
-
 #include <time.h>
 #include <ESPNtpClient.h>
 #include <CheapStepper.h>
 
 AsyncWebServer server(80);
 DNSServer dns;
-OTAWrapper ota;
 
 CheapStepper stepper(motor_pins[0], motor_pins[1], motor_pins[2], motor_pins[3]);
 
