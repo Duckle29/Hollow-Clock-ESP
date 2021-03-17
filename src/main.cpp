@@ -17,16 +17,26 @@ void setup()
   AsyncWiFiManager wifiManager(&server,&dns);
   wifiManager.autoConnect("HollowClock_setup");
 
-  NTP.setTimeZone (USER_TZ);
-  NTP.begin();
+  #ifdef ESP8266
+    configTime(USER_TZ, ntp_server);
+  #else
+    configTzTime(USER_TZ, ntp_server);
+  #endif
+  
   Serial.print("Getting NTP sync");
-  while(!NTP.getFirstSync())
+  time_t now = time(nullptr);
+  while(now < 8*3600*2)
   {
     delay(500);
     Serial.print(".");
+    now = time(nullptr);
   }
+
   Serial.print("\nGot sync. Time is: ");
-  Serial.println(NTP.getTimeDateString(time(nullptr), "%FT%T%z\n"));
+
+  char buff[30];
+  get_iso8601_stamp(buff, sizeof(buff));
+  Serial.println(buff);
 
   move(true);
 
@@ -82,10 +92,18 @@ void handle_ui()
       break;
     
     default:
-      pstrbuff += snprintf(pstrbuff, sizeof(strbuff)-(pstrbuff-strBuffer)-1, "multiple buttons held");
+      pstrbuff += snprintf(pstrbuff, sizeof(strbuff)-(pstrbuff- strbuff)-1, "multiple buttons held");
 
   }
   stepper.setRpm(rpm);
+}
+
+size_t get_iso8601_stamp(char * pbuff, size_t maxlen)
+{
+  time_t now = time(nullptr);
+  struct tm * ptm = localtime(&now);
+
+  return strftime(pbuff, maxlen, "%FT%T%z", ptm);
 }
 
 void move(bool init)
@@ -103,23 +121,27 @@ void move(bool init)
   if (millis()-last_print > print_interval && print_interval != 0)
   {
     last_print = millis();
-    Serial.print(NTP.getTimeDateString(now, "%FT%T%z"));
-    Serial.printf("|  target: %d°\tcurrent: %d°\t%s\n", new_position_deg, last_position_deg, strbuff);
+    char buff[30];
+    get_iso8601_stamp(buff, sizeof(buff));
+
+    Serial.printf("%s|  target: %d°\tcurrent: %d°\t%s\n", buff, new_position_deg, last_position_deg, strbuff);
+
     strbuff[0] = '\0';
+    pstrbuff = strbuff;
   }
 
   if((now - last_movement) > move_interval && !init)
   {
     last_movement = now;
     last_position_deg = new_position_deg;
-    pstrbuff += snprintf(pstrbuff, sizeof(strbuff)-(pstrbuff-strBuffer)-1, "Moving %d°", deg);
+    pstrbuff += snprintf(pstrbuff, sizeof(strbuff)-(pstrbuff-strbuff)-1, "Moving %d°", deg);
     stepper.newMoveDegreesCCW(deg * rotations_per_hour);
   }
   if (init)
   {
     last_movement = now;
     last_position_deg = new_position_deg;
-    pstrbuff += snprintf(pstrbuff, sizeof(strbuff)-(pstrbuff-strBuffer)-1, "Initialization. Would've moved %d°", deg);
+    pstrbuff += snprintf(pstrbuff, sizeof(strbuff)-(pstrbuff-strbuff)-1, "Initialization. Would've moved %d°", deg);
   }
 }
 

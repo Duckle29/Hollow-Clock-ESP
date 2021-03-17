@@ -13,7 +13,7 @@
 // These are here if you want to tinker
     const char* ntp_server = "pool.ntp.org";
 
-    const int32_t move_interval = 60; //[s] Perform steps every minute
+    const int32_t move_interval = 10; //[s] Move the indicator ever 10 seconds
     const uint16_t steps_per_rotation = 4096; 
     const uint32_t seconds_per_rotation = 15*60; 
     const uint8_t rotations_per_hour = 4;

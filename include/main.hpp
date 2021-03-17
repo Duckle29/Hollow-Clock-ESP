@@ -9,15 +9,16 @@
 
 #if defined(ESP8266)
     #include <ESP8266WiFi.h>
+    #include <TZ.h>
 #else
     #include <WiFi.h>
+    #include "TZdef.h"
 #endif
 
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>
 
 #include <time.h>
-#include <ESPNtpClient.h>
 #include <CheapStepper.h>
 
 AsyncWebServer server(80);
@@ -36,3 +37,4 @@ void move(bool init=false);
 void time_sync(void);
 int deg_rollover(int);
 void handle_ui(void);
+size_t get_iso8601_stamp(char*, size_t);
