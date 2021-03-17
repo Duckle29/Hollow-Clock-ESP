@@ -13,6 +13,8 @@
 // These are here if you want to tinker
     const char* ntp_server = "pool.ntp.org";
 
+    const uint8_t slow_rpm = 2;
+    const uint16_t fast_rpm = 10; // Could probably go to 24 if the motor is powered properly. I'm using a 12v motor on 5v
     const int32_t move_interval = 10; //[s] Move the indicator ever 10 seconds
     const uint16_t steps_per_rotation = 4096; 
     const uint32_t seconds_per_rotation = 15*60; 

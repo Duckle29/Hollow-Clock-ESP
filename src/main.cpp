@@ -22,7 +22,7 @@ void setup()
   #else
     configTzTime(USER_TZ, ntp_server);
   #endif
-  
+
   Serial.print("Getting NTP sync");
   time_t now = time(nullptr);
   while(now < 8*3600*2)
@@ -41,7 +41,7 @@ void setup()
   move(true);
 
   stepper.setTotalSteps(steps_per_rotation);
-  stepper.setRpm(6); // Lowest allowed is 6
+  stepper.setRpm(slow_rpm); // Lowest allowed is 6
 }
 
 void loop() 
@@ -65,26 +65,27 @@ void handle_ui()
   }
 
   int rpm = stepper.getRpm();
+  
   switch (state)
   {
     case 0b1000: // Forward fast
-      stepper.setRpm(20);
-      stepper.stepCCW();
+      stepper.setRpm(fast_rpm);
+      stepper.moveCCW(8);
       break;
 
     case 0b0100:  // Forward slow
-      stepper.setRpm(6);
-      stepper.stepCCW();
+      stepper.setRpm(slow_rpm);
+      stepper.moveCCW(8);
       break;
 
     case 0b0010:  // Reverse slow
-      stepper.setRpm(6);
-      stepper.stepCW();
+      stepper.setRpm(slow_rpm);
+      stepper.moveCW(8);
       break;
     
     case 0b0001:  // Reverse fast
-      stepper.setRpm(20);
-      stepper.stepCW();
+      stepper.setRpm(fast_rpm);
+      stepper.moveCW(8);
       break;
     
     case 0b0000:
