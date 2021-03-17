@@ -27,8 +27,8 @@ The four buttons are:
 - Fast forward
 
 On something like the D1 mini, the pins available are *very* limited.
-Recommended pinout if using buttons would be:
-`IN1..IN4 -> {D5, D6, D7, D8}`
-`buttons -> {D1, D2, D3, D4}`
+Recommended pinout if using buttons would be:  
+`IN1..IN4 -> {D5, D6, D7, D8}`  
+`buttons -> {D1, D2, D3, D4}`  
 
 This is because some IO are pulled up or down during and after boot. This way, the pins for the driver won't be high on boot, and the pins for the buttons will have pull-ups available. 
