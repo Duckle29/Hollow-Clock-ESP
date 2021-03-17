@@ -2,11 +2,11 @@
 #include <Arduino.h>
 
 // Probably the only things you want to change:
-    const uint8_t motor_pins[] = {D1, D2, D3, D4};  // The pins you've connected IN1...IN4 to
+    const uint8_t motor_pins[] = {D5, D6, D7, D8};  // The pins you've connected IN1...IN4 to
 
     // Pins used to rotate the motor for manual adjustments. Connect buttons between an pin and gnd (active low)
     // {rev fast, rev fine, fwd fine, fwd fast}
-    const int ui_pins[] = {-1, -1, -1, -1};
+    const int ui_pins[] = {-1, -1, -1, -1};  // {D1, D2, D3, D4}
 
     #define USER_TZ TZ_Europe_Copenhagen  // You can look for your timezone here https://github.com/gmag11/ESPNtpClient/blob/main/src/TZdef.h
 
