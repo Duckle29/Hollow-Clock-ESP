@@ -27,6 +27,8 @@ DNSServer dns;
 CheapStepper stepper(motor_pins[0], motor_pins[1], motor_pins[2], motor_pins[3]);
 
 time_t last_movement;
+time_t last_ntp_sync;
+time_t now;
 uint16_t last_position_deg;
 uint32_t last_print;
 char strbuff[200];

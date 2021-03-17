@@ -46,9 +46,49 @@ void setup()
 
 void loop() 
 {
-  handle_ui();
+  time(&now);
   move();
   stepper.run();
+  handle_ui();
+}
+
+void move(bool init)
+{
+  if (millis() % update_interval && !init)
+  {
+    return;
+  }
+  time_t now = time(nullptr);
+  struct tm * ptm = localtime(&now);
+
+  int new_position_deg = (ptm->tm_min * 60 + ptm->tm_sec) / 10;
+  int deg = deg_rollover(new_position_deg - last_position_deg);
+
+  if (millis()-last_print > print_interval && print_interval != 0)
+  {
+    last_print = millis();
+    char buff[30];
+    get_iso8601_stamp(buff, sizeof(buff));
+
+    Serial.printf("%s|  target: %d°\tcurrent: %d°\t%s\n", buff, new_position_deg, last_position_deg, strbuff);
+
+    strbuff[0] = '\0';
+    pstrbuff = strbuff;
+  }
+
+  if((now - last_movement) > move_interval && !init)
+  {
+    last_movement = now;
+    last_position_deg = new_position_deg;
+    pstrbuff += snprintf(pstrbuff, sizeof(strbuff)-(pstrbuff-strbuff)-1, "Moving %d°", deg);
+    stepper.newMoveDegreesCCW(deg * rotations_per_hour);
+  }
+  if (init)
+  {
+    last_movement = now;
+    last_position_deg = new_position_deg;
+    pstrbuff += snprintf(pstrbuff, sizeof(strbuff)-(pstrbuff-strbuff)-1, "Initialization. Would've moved %d°", deg);
+  }
 }
 
 // This will handle 4 buttons if their pin is set to anything but -1. Any combination can be used.
@@ -99,53 +139,6 @@ void handle_ui()
   stepper.setRpm(rpm);
 }
 
-size_t get_iso8601_stamp(char * pbuff, size_t maxlen)
-{
-  time_t now = time(nullptr);
-  struct tm * ptm = localtime(&now);
-
-  return strftime(pbuff, maxlen, "%FT%T%z", ptm);
-}
-
-void move(bool init)
-{
-  if (millis() % update_interval && !init)
-  {
-    return;
-  }
-  time_t now = time(nullptr);
-  struct tm * ptm = localtime(&now);
-
-  int new_position_deg = (ptm->tm_min * 60 + ptm->tm_sec) / 10;
-  int deg = deg_rollover(new_position_deg - last_position_deg);
-
-  if (millis()-last_print > print_interval && print_interval != 0)
-  {
-    last_print = millis();
-    char buff[30];
-    get_iso8601_stamp(buff, sizeof(buff));
-
-    Serial.printf("%s|  target: %d°\tcurrent: %d°\t%s\n", buff, new_position_deg, last_position_deg, strbuff);
-
-    strbuff[0] = '\0';
-    pstrbuff = strbuff;
-  }
-
-  if((now - last_movement) > move_interval && !init)
-  {
-    last_movement = now;
-    last_position_deg = new_position_deg;
-    pstrbuff += snprintf(pstrbuff, sizeof(strbuff)-(pstrbuff-strbuff)-1, "Moving %d°", deg);
-    stepper.newMoveDegreesCCW(deg * rotations_per_hour);
-  }
-  if (init)
-  {
-    last_movement = now;
-    last_position_deg = new_position_deg;
-    pstrbuff += snprintf(pstrbuff, sizeof(strbuff)-(pstrbuff-strbuff)-1, "Initialization. Would've moved %d°", deg);
-  }
-}
-
 // Mostly taken from CheapStepper source.
 int deg_rollover(int deg)
 {
@@ -160,4 +153,12 @@ int deg_rollover(int deg)
   }
 
   return deg;
+}
+
+size_t get_iso8601_stamp(char * pbuff, size_t maxlen)
+{
+  time_t now = time(nullptr);
+  struct tm * ptm = localtime(&now);
+
+  return strftime(pbuff, maxlen, "%FT%T%z", ptm);
 }
