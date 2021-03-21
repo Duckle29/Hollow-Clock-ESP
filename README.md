@@ -14,7 +14,7 @@ straight on the command-line.
 Just `pio run -t upload` if you're using a d1_mini like me, or add `-e esp32` if
 using a esp32 development board.
 
-## config
+## Config
 All user config is done in `include/config.hpp`.
 
 ## Buttons
