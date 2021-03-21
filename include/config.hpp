@@ -21,7 +21,7 @@ const uint32_t seconds_per_rotation = 15 * 60;
 const uint8_t rotations_per_hour = 3600 / seconds_per_rotation;
 
 // 12V motor can go to ~40 rpm
-const uint8_t rpms[] = {1, 3, 10};
+const uint8_t rpms[] = {1, 3, 10, 5}; // [rpm] Speeds for Clock movement, slow tune, fast tune, dst adjust
 const uint32_t print_interval = 5000; //[ms] How often to print debug info. Set to 0 to disable
 
 const int32_t update_interval = 250; //[ms] check the time every 250 ms

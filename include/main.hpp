@@ -27,7 +27,7 @@ const uint8_t sequence_steps = 8;
 const uint32_t sequence = 0b10001100010001100010001100011001;                            // 8 sections of 4 bits. 32bit constant to store the sequence
 const uint16_t steps_total = (steps_per_rotation * rotations_per_hour) / sequence_steps; // We'll always do a full sequence of steps, so reduce total stu
 const float seconds_to_steps = steps_total / 3600.0;
-uint16_t delays[] = {0, 0, 0}; // This will be calculated in setup
+uint16_t delays[sizeof(rpms) / sizeof(rpms[0])]; // This will be calculated in setup
 
 int32_t steps_left = 0;
 
@@ -39,7 +39,8 @@ uint32_t last_step;
 uint32_t last_print;
 uint32_t current_position;
 
-bool is_dst;
+bool is_dst = false;
+bool dst_speed = false;
 
 char strbuff[200];
 char *pstrbuff = strbuff;

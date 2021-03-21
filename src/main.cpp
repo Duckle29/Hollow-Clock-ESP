@@ -49,7 +49,7 @@ void loop()
 {
   time(&now);
   calculate_move();
-  step(delays[0]);
+  step(dst_speed ? delays[3] : delays[0]);
   handle_ui();
 }
 
@@ -70,6 +70,7 @@ void calculate_move(bool init)
     is_dst = ptm->tm_isdst;
 
     is_dst ? steps_left += steps_total : steps_left -= steps_total;
+    dst_speed = true;
   }
 
   // Calculate new indicator position
@@ -99,7 +100,7 @@ void calculate_move(bool init)
     {
       current_position += steps_total;
     }
-    
+
     // If we're not initializing the variables, move.
     if (!init)
     {
@@ -210,6 +211,7 @@ void step(uint16_t _delay)
   }
   else // If we're not stepping, turn off the motor
   {
+    dst_speed = false;
     for (int i = 0; i < 4; i++)
     {
       digitalWrite(pins[i], LOW);
