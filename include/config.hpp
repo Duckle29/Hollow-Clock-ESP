@@ -2,23 +2,25 @@
 #include <Arduino.h>
 
 // Probably the only things you want to change:
-    const uint8_t motor_pins[] = {D1, D2, D3, D4};  // The pins you've connected IN1...IN4 to
+const uint8_t pins[] = {
+    D1, D2, D3, D4, // Motor pins. IN1 ... IN4
+    // Button pins: fast reverse, tune reverse, tune forward, fast forward
+    D0, D7, D6, D5 // Set to -1 if one isn't used
+};
 
-    // Pins used to rotate the motor for manual adjustments. Connect buttons between an pin and gnd (active low)
-    // {rev fast, rev fine, fwd fine, fwd fast}
-    const int ui_pins[] = {-1, -1, -1, -1};
-
-    #define USER_TZ TZ_Europe_Copenhagen  // You can look for your timezone here https://github.com/gmag11/ESPNtpClient/blob/main/src/TZdef.h
+#define USER_TZ TZ_Europe_Copenhagen // You can look for your timezone here https://github.com/gmag11/ESPNtpClient/blob/main/src/TZdef.h
 
 // These are here if you want to tinker
-    const char* ntp_server = "pool.ntp.org";
+const char *ntp_server = "pool.ntp.org";
 
-    const uint8_t slow_rpm = 3;
-    const uint16_t fast_rpm = 10; // Could probably go to 24 if the motor is powered properly. I'm using a 12v motor on 5v
-    const int32_t move_interval = 30; //[s] Move the indicator ever 10 seconds
-    const uint16_t steps_per_rotation = 4096; 
-    const uint32_t seconds_per_rotation = 15*60; 
-    const uint8_t rotations_per_hour = 4;
-    const uint32_t print_interval = 5000; //[ms] How often to print debug info. Set to 0 to disable
+const int32_t move_interval = 10; //[s] Move the indicator ever 10 seconds
 
-    const int32_t update_interval = 100; //[ms] check the time every 100 ms
+const uint16_t steps_per_rotation = 4096;
+const uint32_t seconds_per_rotation = 15 * 60;
+const uint8_t rotations_per_hour = 3600 / seconds_per_rotation;
+
+// 12V motor can go to ~40 rpm
+const uint8_t rpms[] = {1, 3, 20};
+const uint32_t print_interval = 5000; //[ms] How often to print debug info. Set to 0 to disable
+
+const int32_t update_interval = 250; //[ms] check the time every 250 ms
