@@ -3,9 +3,9 @@
 
 // --- Probably the only things you want to change --- //
 const uint8_t pins[] = {
-    D1, D2, D3, D4, // Motor pins. IN1 ... IN4
+    D5, D6, D7, D8, // Motor pins. IN1 ... IN4
     // Button pins: fast reverse, tune reverse, tune forward, fast forward
-    D0, D7, D6, D5 // Set to -1 if one isn't used
+    D1, D2, D3, D4 // Set to -1 if one isn't used
 };
 
 #define USER_TZ TZ_Europe_Copenhagen // You can look for your timezone here https://github.com/gmag11/ESPNtpClient/blob/main/src/TZdef.h
