@@ -90,16 +90,17 @@ void calculate_move(bool init)
     last_movement = now;
     current_position += step_diff;
 
+    // Constrain current_position to be within [0,steps_total[
     if (current_position >= steps_total)
     {
       current_position -= steps_total;
     }
-
-    if (current_position < 0)
+    else if (current_position < 0)
     {
       current_position += steps_total;
     }
-
+    
+    // If we're not initializing the variables, move.
     if (!init)
     {
       steps_left += step_diff;
@@ -172,6 +173,7 @@ void handle_ui()
   }
 }
 
+// Get an ISO8601 timestapt string
 size_t get_iso8601_stamp(char *pbuff, size_t maxlen)
 {
   time_t now = time(nullptr);
@@ -187,7 +189,6 @@ uint16_t get_delay(int rpm)
 
 void time_sync()
 {
-  // Initial NTP sync / steup
 #ifdef ESP8266
   configTime(USER_TZ, ntp_server);
 #else
